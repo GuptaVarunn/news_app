@@ -68,6 +68,15 @@ class _NewsHomePageState extends State<NewsHomePage> {
     });
   }
 
+  void _logout() async {
+    await SharedPrefsHelper.clearUserData();
+    setState(() {
+      userEmail = null;
+    });
+
+    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => LoginPage()));
+  }
+
   void _navigateToAuth() {
     Navigator.push(
       context,
@@ -84,7 +93,22 @@ class _NewsHomePageState extends State<NewsHomePage> {
         title: Text('News App'),
         backgroundColor: Colors.blueAccent,
         actions: [
-          IconButton(icon: Icon(Icons.person), onPressed: _navigateToAuth),
+          PopupMenuButton<String>(
+            icon: Icon(Icons.person),
+            onSelected: (value) {
+              if (value == 'Logout') {
+                _logout();
+              } else {
+                _navigateToAuth();
+              }
+            },
+            itemBuilder: (context) => [
+              if (userEmail != null)
+                PopupMenuItem(value: 'Logout', child: Text('Logout')),
+              if (userEmail == null)
+                PopupMenuItem(value: 'Login', child: Text('Login / Sign Up')),
+            ],
+          ),
         ],
       ),
       body: Column(
@@ -94,32 +118,25 @@ class _NewsHomePageState extends State<NewsHomePage> {
             scrollDirection: Axis.horizontal,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              children:
-                  newsData.keys.map((category) {
-                    return Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 8.0,
-                        vertical: 10,
-                      ),
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              selectedCategory == category
-                                  ? Colors.blue
-                                  : Colors.grey,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            selectedCategory = category;
-                          });
-                        },
-                        child: Text(
-                          category,
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      ),
-                    );
-                  }).toList(),
+              children: newsData.keys.map((category) {
+                return Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 10),
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: selectedCategory == category ? Colors.blue : Colors.grey,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        selectedCategory = category;
+                      });
+                    },
+                    child: Text(
+                      category,
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                );
+              }).toList(),
             ),
           ),
 
@@ -149,10 +166,7 @@ class _NewsHomePageState extends State<NewsHomePage> {
                         ),
                         subtitle: Text("Source: ${article.source}"),
                         trailing: IconButton(
-                          icon: Icon(
-                            Icons.bookmark_border,
-                            color: Colors.blueAccent,
-                          ),
+                          icon: Icon(Icons.bookmark_border, color: Colors.blueAccent),
                           onPressed: () {
                             _navigateToAuth();
                           },
