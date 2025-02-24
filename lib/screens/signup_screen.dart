@@ -14,24 +14,37 @@ class _SignupPageState extends State<SignupPage> {
   bool isPasswordVisible = false;
   String? errorMessage;
 
+  bool _isValidEmail(String email) {
+    final RegExp emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+$');
+    return emailRegex.hasMatch(email);
+  }
+
   Future<void> _signUpUser() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    String email = emailController.text;
+    String email = emailController.text.trim();
     String password = passwordController.text;
-    String name = nameController.text;
+    String name = nameController.text.trim();
 
-    if (email.isNotEmpty && password.length >= 6) {
-      await prefs.setString('user_email', email);
-      await prefs.setString('user_password', password);
-      await prefs.setString('user_name', name);
-      await prefs.setBool('is_logged_in', true);
+    if (!_isValidEmail(email)) {
+      setState(() {
+        errorMessage = "Enter a valid email address!";
+      });
+      return;
+    }
 
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => LoginPage()));
-    } else {
+    if (password.length < 6) {
       setState(() {
         errorMessage = "Password must be at least 6 characters!";
       });
+      return;
     }
+
+    await prefs.setString('user_email', email);
+    await prefs.setString('user_password', password);
+    await prefs.setString('user_name', name);
+    await prefs.setBool('is_logged_in', false);
+
+    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => LoginPage()));
   }
 
   @override

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../utils/shared_prefs.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'home_screen.dart';
 import 'signup_screen.dart';
 
@@ -14,11 +14,14 @@ class _LoginPageState extends State<LoginPage> {
   bool isPasswordVisible = false;
   String? errorMessage;
 
-  void _login() async {
-    final savedUser = await SharedPrefsHelper.getUser();
-    if (emailController.text == savedUser['email'] &&
-        passwordController.text == savedUser['password']) {
-      await SharedPrefsHelper.saveUser(emailController.text, passwordController.text);
+  Future<void> _login() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? savedEmail = prefs.getString('user_email');
+    String? savedPassword = prefs.getString('user_password');
+
+    if (emailController.text == savedEmail &&
+        passwordController.text == savedPassword) {
+      await prefs.setBool('is_logged_in', true);
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => NewsHomePage()),
