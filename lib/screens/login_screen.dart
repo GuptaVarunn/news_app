@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import '../utils/shared_prefs.dart';
+import 'home_screen.dart';
 import 'signup_screen.dart';
-import '../screens/home_screen.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -11,19 +11,21 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  bool isPasswordVisible = false;
   String? errorMessage;
 
-  Future<void> _loginUser() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? storedEmail = prefs.getString('user_email');
-    String? storedPassword = prefs.getString('user_password');
-
-    if (emailController.text == storedEmail && passwordController.text == storedPassword) {
-      await prefs.setBool('is_logged_in', true);
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => NewsHomePage()));
+  void _login() async {
+    final savedUser = await SharedPrefsHelper.getUser();
+    if (emailController.text == savedUser['email'] &&
+        passwordController.text == savedUser['password']) {
+      await SharedPrefsHelper.saveUser(emailController.text, passwordController.text);
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => NewsHomePage()),
+      );
     } else {
       setState(() {
-        errorMessage = "Invalid email or password!";
+        errorMessage = 'Invalid credentials';
       });
     }
   }
@@ -31,24 +33,68 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text("Login"),
+        backgroundColor: Colors.blueAccent,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
       body: Center(
-        child: Padding(
+        child: Container(
           padding: EdgeInsets.all(20),
+          margin: EdgeInsets.symmetric(horizontal: 30),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(10),
+            boxShadow: [BoxShadow(color: Colors.grey, blurRadius: 5, spreadRadius: 1)],
+          ),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Text("Login", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+              Text("Login", style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.blueAccent)),
               SizedBox(height: 20),
-              TextField(controller: emailController, decoration: InputDecoration(labelText: "Email")),
-              TextField(controller: passwordController, decoration: InputDecoration(labelText: "Password"), obscureText: true),
-              if (errorMessage != null) Text(errorMessage!, style: TextStyle(color: Colors.red)),
+              TextField(
+                controller: emailController,
+                decoration: InputDecoration(
+                  labelText: "Email",
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                  prefixIcon: Icon(Icons.email),
+                ),
+              ),
+              SizedBox(height: 15),
+              TextField(
+                controller: passwordController,
+                obscureText: !isPasswordVisible,
+                decoration: InputDecoration(
+                  labelText: "Password",
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                  prefixIcon: Icon(Icons.lock),
+                  suffixIcon: IconButton(
+                    icon: Icon(isPasswordVisible ? Icons.visibility : Icons.visibility_off),
+                    onPressed: () => setState(() => isPasswordVisible = !isPasswordVisible),
+                  ),
+                ),
+              ),
+              if (errorMessage != null) Padding(
+                padding: EdgeInsets.only(top: 10),
+                child: Text(errorMessage!, style: TextStyle(color: Colors.red)),
+              ),
               SizedBox(height: 20),
-              ElevatedButton(onPressed: _loginUser, child: Text("Login")),
+              ElevatedButton(
+                onPressed: _login,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blueAccent,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  padding: EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+                ),
+                child: Text("Login", style: TextStyle(fontSize: 16, color: Colors.white)),
+              ),
+              SizedBox(height: 10),
               TextButton(
-                onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => SignupPage()));
-                },
-                child: Text("Don't have an account? Sign up"),
+                onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => SignupPage())),
+                child: Text("Don't have an account? Sign up", style: TextStyle(color: Colors.blueAccent)),
               ),
             ],
           ),
