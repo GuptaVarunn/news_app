@@ -5,6 +5,14 @@ allprojects {
     }
 }
 
+plugins {
+  // ...
+
+  // Add the dependency for the Google services Gradle plugin
+  id("com.google.gms.google-services") version "4.4.2" apply false
+
+}
+
 val newBuildDir: Directory = rootProject.layout.buildDirectory.dir("../../build").get()
 rootProject.layout.buildDirectory.value(newBuildDir)
 
@@ -18,4 +26,9 @@ subprojects {
 
 tasks.register<Delete>("clean") {
     delete(rootProject.layout.buildDirectory)
+}
+
+dependencies {
+    classpath("com.android.tools.build:gradle:8.1.0") // Ensure Gradle Plugin version
+    classpath("com.google.gms:google-services:4.3.10") // Firebase
 }
