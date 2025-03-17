@@ -14,7 +14,7 @@ class NewsArticle {
 class NewsList extends StatelessWidget {
   final List<NewsArticle> articles;
 
-  NewsList({Key? key, required this.articles}) : super(key: key);
+  const NewsList({super.key, required this.articles});
 
   @override
   Widget build(BuildContext context) {

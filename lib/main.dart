@@ -19,6 +19,8 @@ void main() async {
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -31,6 +33,8 @@ class MyApp extends StatelessWidget {
 }
 
 class FirebaseCheckScreen extends StatefulWidget {
+  const FirebaseCheckScreen({super.key});
+
   @override
   _FirebaseCheckScreenState createState() => _FirebaseCheckScreenState();
 }

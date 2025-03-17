@@ -6,6 +6,8 @@ import 'login_screen.dart';
 import 'signup_screen.dart';
 
 class NewsHomePage extends StatefulWidget {
+  const NewsHomePage({super.key});
+
   @override
   _NewsHomePageState createState() => _NewsHomePageState();
 }
